@@ -1,0 +1,73 @@
+version: "3.7"
+services:
+  postgres:
+    image: postgres:11
+    ports:
+      - 5641:5432
+    env_file:
+      - ./env/postgres.env
+    network_mode: bridge
+    volumes:
+      - data:/data
+
+  stellar-core:
+    build:
+      context: ./stellar-core
+    depends_on:
+      - postgres
+    ports:
+      - 11625:11625
+      - 11626:11626
+    env_file:
+      - env/stellar-core.env
+    network_mode: bridge
+    volumes:
+      - data:/data
+    command: ["/start.sh"]
+
+  stellar-horizon:
+    build:
+      context: ./stellar-horizon
+    depends_on:
+      - postgres
+      - stellar-core
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    env_file:
+      - env/stellar-horizon.env
+    network_mode: bridge
+    volumes:
+      - data:/data
+    command:
+      - "/start.sh"
+      - "--apply-migrations"
+      - "--tls-cert"
+      - "/stellar-horizon.crt"
+      - "--tls-key"
+      - "/stellar-horizon.key"
+
+  web-auth-server:
+    image: blocktop/mp-web-auth-server
+    ports:
+      - "3000:3000"
+    env_file:
+      - env/web-auth-server.env
+    network_mode: bridge
+    volumes:
+      - ./assets:/assets
+
+  transfer-server:
+    image: blocktop/mp-transfer-server
+    ports:
+      - "3001:3001"
+    env_file:
+      - env/transfer-server.env
+    network_mode: bridge
+    volumes:
+      - ./assets:/assets
+
+volumes:
+  data:
+    external:
+      name: data-volume
