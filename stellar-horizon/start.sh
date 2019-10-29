@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ ! -f /usr/share/ca-certificates/rootCA.pem ]]; then
+  sudo cp -v /assets/rootCA.pem /usr/share/ca-certificates/ 
+  echo 1 | sudo dpkg-reconfigure --terse ca-certificates
+fi
+
 sudo mkdir -p /data/horizon
 sudo chown stellar:stellar /data/horizon
 

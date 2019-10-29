@@ -21,17 +21,17 @@ set -e
 SEED=/data/core/seed
 ADDRESS=/data/core/address
 if [ ! -f $SEED ]; then
-  out=`stellar-core gen-seed`
+  out=$(stellar-core gen-seed)
   out_clean=${out/\n/" "}
-  echo -n $out_clean | cut -d" " -f 3 > $SEED
-  echo -n $out_clean | cut -d" " -f 5 > $ADDRESS
+  echo -n $out_clean | cut -d" " -f 3 >$SEED
+  echo -n $out_clean | cut -d" " -f 5 >$ADDRESS
 fi
 
-export NODE_SEED=`cat $SEED`
-export NODE_ADDRESS=`cat $ADDRESS`
+export NODE_SEED=$(cat $SEED)
+export NODE_ADDRESS=$(cat $ADDRESS)
 
 STELLAR_CORE_CFG=/data/core/stellar-core.cfg
-sudo cp -v /stellar-core.cfg $STELLAR_CORE_CFG
+sudo cp -v /assets/stellar-core.cfg $STELLAR_CORE_CFG
 sudo chown stellar:stellar $STELLAR_CORE_CFG
 # Put node seed in cfg file
 sed -i "s,NODE_SEED=,NODE_SEED=\"$NODE_SEED\",g" $STELLAR_CORE_CFG
