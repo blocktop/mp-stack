@@ -1,5 +1,7 @@
 FROM debian:10-slim
 
+ADD etc /etc/
+
 ADD https://raw.githubusercontent.com/guilhem/apt-get-install/master/apt-get-install /usr/bin/
 RUN chmod +x /usr/bin/apt-get-install \
     && set -ex \
@@ -10,9 +12,7 @@ RUN chmod +x /usr/bin/apt-get-install \
     && wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - \
     && echo "deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main" | tee -a /etc/apt/sources.list.d/pgdg.list \
     && apt-get-install postgresql-client-11 \
-    && useradd -ms /bin/bash -G sudo stellar
-
-COPY ./etc/sudoers.d/* /etc/sudoers.d/
+    && useradd -ms /bin/bash -G sudo stellar \
+    && ln -s /etc/ssl/certs/rootCA.pem $(openssl x509 -noout -hash -in /etc/ssl/certs/rootCA.pem)
 
 USER stellar
-

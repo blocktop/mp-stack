@@ -90,8 +90,19 @@ done
 log "starting stellar horizon"
 docker-compose up -d stellar-horizon
 
+log "waiting for stellar horizon to accept connections"
+while ! nc -z localhost 8000 >/dev/null 2>/dev/null; do
+  sleep 1
+done
+
+log "starting stellar bridge"
+docker-compose up -d stellar-bridge
+
 log "starting web auth server"
 docker-compose up -d web-auth-server
 
 log "starting transfer server"
 docker-compose up -d transfer-server
+
+log "starting web server"
+docker-compose up -d web-server

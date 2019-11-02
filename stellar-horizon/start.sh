@@ -1,9 +1,6 @@
 #!/bin/bash
 
-if [[ ! -f /usr/share/ca-certificates/rootCA.pem ]]; then
-  sudo cp -v /assets/rootCA.pem /usr/share/ca-certificates/ 
-  echo 1 | sudo dpkg-reconfigure --terse ca-certificates
-fi
+set -ex
 
 sudo mkdir -p /data/horizon
 sudo chown stellar:stellar /data/horizon
@@ -11,11 +8,13 @@ sudo chown stellar:stellar /data/horizon
 INIT_DB=/data/horizon/.init_db
 if [[ ! -f $INIT_DB ]]; then
   DB_URL="postgresql://postgres:pgpassword@host.docker.internal:5641/postgres?sslmode=disable"
-  psql $DB_URL -c "create role stellar with password 'pgpassword'"
-  psql $DB_URL -c "alter role stellar login"
-  psql $DB_URL -c "create database horizon"
-  psql $DB_URL -c "alter database horizon owner to stellar"
-  set -e
+
+  # ignore errors in case database or user is already created
+  psql $DB_URL -c "create role stellar with password 'pgpassword'" || :
+  psql $DB_URL -c "alter role stellar login" || :
+  psql $DB_URL -c "create database horizon" || :
+  psql $DB_URL -c "alter database horizon owner to stellar" || :
+
   stellar-horizon db init
   touch $INIT_DB
 fi

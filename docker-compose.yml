@@ -23,7 +23,7 @@ services:
     network_mode: bridge
     volumes:
       - data:/data
-      - ./assets:/assets
+      - ./assets/stellar-core:/assets
 
   stellar-horizon:
     build:
@@ -39,13 +39,30 @@ services:
     network_mode: bridge
     volumes:
       - data:/data
-      - ./assets:/assets
+      - ./assets/stellar-horizon:/assets
     command:
       - "--apply-migrations"
       - "--tls-cert"
       - "/assets/stellar-horizon.crt"
       - "--tls-key"
       - "/assets/stellar-horizon.key"
+
+  stellar-bridge:
+    build:
+      context: ./stellar-bridge
+    depends_on:
+      - postgres
+      - stellar-horizon
+    restart: on-failure
+    ports:
+      - "8006:8006"
+    env_file:
+      - env/stellar-bridge.env
+    network_mode: bridge
+    volumes:
+      - data:/data
+      - ./assets/stellar-bridge:/assets
+    command: ["sleep", "10000000"]
 
   web-auth-server:
     image: blocktop/mp-web-auth-server
@@ -55,7 +72,7 @@ services:
       - env/web-auth-server.env
     network_mode: bridge
     volumes:
-      - ./assets:/assets
+      - ./assets/web-auth-server:/assets
 
   transfer-server:
     image: blocktop/mp-transfer-server
@@ -65,7 +82,17 @@ services:
       - env/transfer-server.env
     network_mode: bridge
     volumes:
-      - ./assets:/assets
+      - ./assets/transfer-server:/assets
+
+  web-server:
+    image: blocktop/mp-web
+    ports:
+      - "8001:8001"
+    env_file:
+      - env/web.env
+    network_mode: bridge
+    volumes:
+      - ./assets/web:/assets
 
 volumes:
   data:

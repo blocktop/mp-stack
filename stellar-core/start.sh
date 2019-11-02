@@ -1,21 +1,23 @@
 #!/bin/bash
 
+set -ex
+
 sudo mkdir -p /data/core
 sudo chown stellar:stellar /data/core
 
 INIT_DB=/data/core/.init_db
 if [[ ! -f $INIT_DB ]]; then
   DB_URL="postgresql://postgres:pgpassword@host.docker.internal:5641/postgres?sslmode=disable"
-  psql $DB_URL -c "create role stellar with password 'pgpassword'"
-  psql $DB_URL -c "alter role stellar login"
-  psql $DB_URL -c "create database stellar"
-  psql $DB_URL -c "alter database stellar owner to stellar"
-  set -e
+
+  # ignore errors in these commands in case user or database is already created
+  psql $DB_URL -c "create role stellar with password 'pgpassword'" || :
+  psql $DB_URL -c "alter role stellar login" || :
+  psql $DB_URL -c "create database stellar" || :
+  psql $DB_URL -c "alter database stellar owner to stellar" || :
+
   stellar-core new-db
   touch $INIT_DB
 fi
-
-set -e
 
 # Ensure node seed has been generated
 SEED=/data/core/seed
