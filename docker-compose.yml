@@ -62,7 +62,24 @@ services:
     volumes:
       - data:/data
       - ./assets/stellar-bridge:/assets
-    command: ["sleep", "10000000"]
+
+  stellar-compliance:
+    build:
+      context: ./stellar-compliance
+    depends_on:
+      - postgres
+      - stellar-horizon
+      - stellar-bridge
+    restart: on-failure
+    ports:
+      - "8001:8001"
+      - "8002:8002"
+    env_file:
+      - env/stellar-compliance.env
+    network_mode: bridge
+    volumes:
+      - data:/data
+      - ./assets/stellar-compliance:/assets
 
   web-auth-server:
     image: blocktop/mp-web-auth-server
@@ -87,7 +104,7 @@ services:
   web-server:
     image: blocktop/mp-web
     ports:
-      - "8001:8001"
+      - "3002:3002"
     env_file:
       - env/web.env
     network_mode: bridge

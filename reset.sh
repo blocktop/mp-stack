@@ -98,6 +98,9 @@ done
 log "starting stellar bridge"
 docker-compose up -d stellar-bridge
 
+log "starting stellar compliance"
+docker-compose up -d stellar-compliance
+
 log "starting web auth server"
 docker-compose up -d web-auth-server
 
