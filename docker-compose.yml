@@ -81,6 +81,21 @@ services:
       - data:/data
       - ./assets/stellar-compliance:/assets
 
+  stellar-federation:
+    build:
+      context: ./stellar-federation
+    depends_on:
+      - postgres
+    restart: on-failure
+    ports:
+      - "8003:8003"
+    env_file:
+      - env/stellar-federation.env
+    network_mode: bridge
+    volumes:
+      - data:/data
+      - ./assets/stellar-federation:/assets
+
   web-auth-server:
     image: blocktop/mp-web-auth-server
     ports:
